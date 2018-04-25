@@ -15,8 +15,8 @@ parser.add_argument("seed", nargs='?', help="начальное слово", def
 args = parser.parse_args()
 seed = args.seed
 length = int(args.length)
-model = open(args.model, 'rb')
-d = pickle.load(model)
+with open(args.model, 'rb') as model:
+    d = pickle.load(model)
 
 if args.output != 'stdout':
     output = open(args.output, 'w')

@@ -16,16 +16,17 @@ parser.add_argument("lc", nargs='?', help="lowercase", default=False)
 parser.add_argument("url", nargs='?', help="адрес сайта")
 args = parser.parse_args()
 
-#взятие текста с сайта
-r = requests.get(args.url, 'r')
-# получение html кода страницы
-htmlcode = BeautifulSoup(r.text, "html.parser")
-#извлечение текстовых данных из html
-textonly = ''.join([e for e in htmlcode.recursiveChildGenerator()
-         if isinstance(e, str)])
-#запись в файл, из которого берутся данные
-with open(args.input, 'wb') as f:
-    f.write(textonly.encode())
+def workWithSite():
+    #взятие текста с сайта
+    r = requests.get(args.url, 'r')
+    # получение html кода страницы
+    htmlcode = BeautifulSoup(r.text, "html.parser")
+    #извлечение текстовых данных из html
+    textonly = ''.join([e for e in htmlcode.recursiveChildGenerator()
+             if isinstance(e, str)])
+    #запись в файл, из которого берутся данные
+    with open(args.input, 'wb') as f:
+        f.write(textonly.encode())
 
 
 def first(word):
@@ -36,8 +37,7 @@ def first(word):
     else:
         d['begin'][word] = 1
 
-def func(line):
-    global d
+def func(d, line):
     line = line.decode()
     if args.lc:
         line = line.lower()
@@ -69,16 +69,17 @@ def func(line):
 
 d = dict()
 d['*'] = 0
-
+workWithSite()
 #генерация словаря
 if args.input != 'stdin':
     with open(args.input, 'rb') as fin:
         for line in fin:
-            func(line)
+            func(d, line)
 else:
+
     for line in fileinput.input():
-        func(line)
+        func(d, line)
 
 #сохранение модели в файл
-model = open(args.model, 'wb')
-pickle.dump(d, model, protocol=0)
+with open(args.model, 'wb') as model:
+    pickle.dump(d, model, protocol=0)
